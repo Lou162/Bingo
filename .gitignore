@@ -1,0 +1,22 @@
+# Expo
+.expo/
+
+# Dependencies
+node_modules/
+
+# Build / cache
+dist/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.log
+npm-debug.log*

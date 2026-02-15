@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "NightBingo",
+    "slug": "nightbingo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0f172a"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nightbingo.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a"
+      },
+      "package": "com.nightbingo.app"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
