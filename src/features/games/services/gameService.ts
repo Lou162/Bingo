@@ -27,6 +27,7 @@ export async function createGame(
     name,
     gridSize,
     maxCells,
+    votesFrozen: false,
     status: GAME_STATUS.LOBBY,
     createdBy,
     createdAt: serverTimestamp(),
@@ -44,6 +45,7 @@ export function subscribeGamesByServer(
       name: string;
       gridSize: number;
       maxCells?: number;
+      votesFrozen?: boolean;
       status: string;
       createdBy: string;
     }>,
@@ -71,6 +73,13 @@ export async function startGame(gameId: string): Promise<void> {
 
 export async function endGame(gameId: string): Promise<void> {
   await updateDoc(doc(db, GAMES, gameId), { status: GAME_STATUS.ENDED });
+}
+
+export async function setVotesFrozen(
+  gameId: string,
+  votesFrozen: boolean,
+): Promise<void> {
+  await updateDoc(doc(db, GAMES, gameId), { votesFrozen });
 }
 
 export async function getGame(gameId: string) {

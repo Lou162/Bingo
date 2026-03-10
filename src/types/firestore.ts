@@ -18,6 +18,7 @@ export interface GameDoc {
   name: string;
   gridSize: number;
   maxCells?: number;
+  votesFrozen?: boolean;
   status: GameStatus;
   createdBy: string;
   createdAt: { toDate: () => Date };
@@ -27,6 +28,7 @@ export interface CellDoc {
   gameId: string;
   text: string;
   createdBy: string;
+  selectedBy?: string[];
   status: CellStatus;
   validatedBy?: string;
   createdAt: { toDate: () => Date };
@@ -38,6 +40,7 @@ export interface CellData {
   index?: number;
   text: string;
   createdBy: string;
+  selectedBy: string[];
   status: CellStatus;
   validatedBy?: string;
   createdAt: Date;

@@ -7,7 +7,6 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
-  Button,
 } from "react-native";
 import { useAuth } from "../../auth";
 import { useGame } from "../hooks/useGame";
@@ -16,12 +15,13 @@ import { useLeaderboard } from "../hooks/useLeaderboard";
 import { useDisplayNames } from "../../../hooks/useDisplayNames";
 import { GridCell } from "../../../shared/components";
 import { Leaderboard } from "../../../shared/components";
-import { startGame, endGame } from "../services/gameService";
+import { startGame, endGame, setVotesFrozen } from "../services/gameService";
 import {
   updateCellText,
   setCellPending,
   setCellValidated,
   setCellRejected,
+  toggleCellSelection,
 } from "../services/cellService";
 import {
   GAME_STATUS,
@@ -62,13 +62,15 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
 
   const maxCells =
     game?.maxCells ?? (game?.gridSize ? game.gridSize * game.gridSize : 9);
+  const votesFrozen = !!game?.votesFrozen;
   const gridSize =
     game?.gridSize ?? Math.max(1, Math.ceil(Math.sqrt(maxCells)));
   const filledCellsCount = cells.filter(
     (c) => c.text.trim().length >= MIN_PREDICTION_LENGTH,
   ).length;
   const canAddCell = isLobby && filledCellsCount < maxCells;
-  const canStart = isAdmin && filledCellsCount > 0;
+  const gridFull = filledCellsCount >= 1 && filledCellsCount <= maxCells;
+  const canStart = isAdmin && gridFull;
 
   const handleStartGame = async () => {
     if (!canStart || !isAdmin) return;
@@ -85,6 +87,16 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
     setLoading(true);
     try {
       await endGame(gameId);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFreezeVotes = async () => {
+    if (!isAdmin || !isActive || votesFrozen) return;
+    setLoading(true);
+    try {
+      await setVotesFrozen(gameId, true);
     } finally {
       setLoading(false);
     }
@@ -112,13 +124,30 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
 
       return;
     }
-    if (isActive && cell.status === CELL_STATUS.EMPTY && cell.text.trim()) {
-      setCellPending(cell.id);
-      if (isAdmin) {
-        setEditModalVisible({ visible: true, caseId: cell.id });
-      }
+
+    if (!isActive || !cell.text.trim()) return;
+    if (votesFrozen) return;
+
+    // Phase 2: chaque joueur vote sur les evenements probables.
+    if (
+      cell.status === CELL_STATUS.EMPTY ||
+      cell.status === CELL_STATUS.PENDING
+    ) {
+      const isSelected = (cell.selectedBy ?? []).includes(user.uid);
+      void toggleCellSelection(cell.id, user.uid, isSelected);
     }
-    if (isActive && isAdmin && cell.status === CELL_STATUS.PENDING) {
+  };
+
+  const handleCellLongPress = (cell: (typeof cells)[0]) => {
+    if (!isAdmin || !isActive || !cell.text.trim()) return;
+
+    // Phase 3 conservee: l'admin bascule une case en pending, puis valide/rejette.
+    if (cell.status === CELL_STATUS.EMPTY) {
+      void setCellPending(cell.id);
+      setEditModalVisible({ visible: true, caseId: cell.id });
+      return;
+    }
+    if (cell.status === CELL_STATUS.PENDING) {
       setEditModalVisible({ visible: true, caseId: cell.id });
     }
   };
@@ -179,8 +208,15 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
             <GridCell
               text={item.text}
               status={item.status}
+              selected={
+                !!user?.uid && (item.selectedBy ?? []).includes(user.uid)
+              }
+              voteCount={(item.selectedBy ?? []).length}
               onPress={() => {
                 handleCellPress(item);
+              }}
+              onLongPress={() => {
+                handleCellLongPress(item);
               }}
               disabled={game.status === GAME_STATUS.ENDED}
             />
@@ -213,10 +249,38 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
           <Text className='text-white text-center font-semibold'>
             {canStart
               ? `Lancer la partie (${filledCellsCount}/${maxCells} cases remplies)`
-              : `Ajoutez au moins 1 case pour lancer (max ${maxCells})`}
+              : `Terminez la grille avant de lancer (${filledCellsCount}/${maxCells})`}
           </Text>
         </TouchableOpacity>
       )}
+
+      {isActive && (
+        <Text className='text-slate-300 text-center mt-4'>
+          {votesFrozen
+            ? "Votes geles. Les joueurs ne peuvent plus modifier leurs choix."
+            : "Cliquez sur une case pour voter. L'admin peut geler les votes."}
+        </Text>
+      )}
+
+      {isAdmin && isActive && !votesFrozen && (
+        <TouchableOpacity
+          onPress={handleFreezeVotes}
+          disabled={loading}
+          className='bg-amber-700 py-4 rounded-xl mt-4'>
+          <Text className='text-white text-center font-semibold'>
+            Geler les votes
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {isAdmin && isActive && votesFrozen && (
+        <View className='bg-amber-900/50 border border-amber-600 rounded-xl mt-4 py-3 px-4'>
+          <Text className='text-amber-200 text-center font-semibold'>
+            Votes geles
+          </Text>
+        </View>
+      )}
+
       {isAdmin && isActive && (
         <TouchableOpacity
           onPress={handleEndGame}

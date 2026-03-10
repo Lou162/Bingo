@@ -9,6 +9,8 @@ import {
   getDocs,
   writeBatch,
   serverTimestamp,
+  arrayUnion,
+  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../../../shared/config";
 import { CELL_STATUS } from "../../../utils/constants";
@@ -18,7 +20,7 @@ const CELLS = "cells";
 
 export async function createEmptyCells(
   gameId: string,
-  count: number
+  count: number,
 ): Promise<void> {
   const batch = writeBatch(db);
   const col = collection(db, CELLS);
@@ -29,6 +31,7 @@ export async function createEmptyCells(
       index: i,
       text: "",
       createdBy: "",
+      selectedBy: [],
       status: CELL_STATUS.EMPTY,
       createdAt: serverTimestamp(),
     });
@@ -39,7 +42,7 @@ export async function createEmptyCells(
 export async function updateCellText(
   cellId: string,
   text: string,
-  createdBy: string
+  createdBy: string,
 ): Promise<void> {
   await updateDoc(doc(db, CELLS, cellId), {
     text: text.trim(),
@@ -50,12 +53,12 @@ export async function updateCellText(
 
 export function subscribeCellsByGame(
   gameId: string,
-  onUpdate: (cells: CellData[]) => void
+  onUpdate: (cells: CellData[]) => void,
 ): () => void {
   const q = query(
     collection(db, CELLS),
     where("gameId", "==", gameId),
-    orderBy("index", "asc")
+    orderBy("index", "asc"),
   );
   return onSnapshot(q, (snapshot) => {
     const cells = snapshot.docs.map((d) => {
@@ -65,6 +68,7 @@ export function subscribeCellsByGame(
         gameId: data.gameId,
         text: data.text ?? "",
         createdBy: data.createdBy,
+        selectedBy: Array.isArray(data.selectedBy) ? data.selectedBy : [],
         status: data.status ?? CELL_STATUS.EMPTY,
         validatedBy: data.validatedBy,
         createdAt: data.createdAt?.toDate?.() ?? new Date(),
@@ -80,7 +84,7 @@ export async function setCellPending(cellId: string): Promise<void> {
 
 export async function setCellValidated(
   cellId: string,
-  validatedBy: string
+  validatedBy: string,
 ): Promise<void> {
   await updateDoc(doc(db, CELLS, cellId), {
     status: CELL_STATUS.VALIDATED,
@@ -92,13 +96,23 @@ export async function setCellRejected(cellId: string): Promise<void> {
   await updateDoc(doc(db, CELLS, cellId), { status: CELL_STATUS.REJECTED });
 }
 
+export async function toggleCellSelection(
+  cellId: string,
+  userId: string,
+  isSelected: boolean,
+): Promise<void> {
+  await updateDoc(doc(db, CELLS, cellId), {
+    selectedBy: isSelected ? arrayRemove(userId) : arrayUnion(userId),
+  });
+}
+
 export async function getCellsForGame(
-  gameId: string
+  gameId: string,
 ): Promise<{ id: string; index: number }[]> {
   const q = query(
     collection(db, CELLS),
     where("gameId", "==", gameId),
-    orderBy("index", "asc")
+    orderBy("index", "asc"),
   );
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, index: d.data().index }));
