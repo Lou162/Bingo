@@ -7,6 +7,7 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import { useAuth } from "../../auth";
 import { useGame } from "../hooks/useGame";
@@ -27,6 +28,7 @@ import {
   CELL_STATUS,
   MIN_PREDICTION_LENGTH,
 } from "../../../utils/constants";
+import { EditProfileModal } from "./GameValidationModal";
 
 interface GameScreenProps {
   gameId: string;
@@ -49,6 +51,10 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   );
   const [editValue, setEditValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isEditModalVisible, setEditModalVisible] = useState({
+    visible: false,
+    caseId: null as string | null,
+  });
 
   const isAdmin = user?.uid && game?.createdBy === user.uid;
   const isLobby = game?.status === GAME_STATUS.LOBBY;
@@ -90,10 +96,17 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
         setEditCell({ id: cell.id, text: cell.text });
         setEditValue(cell.text);
       }
+
       return;
     }
     if (isActive && cell.status === CELL_STATUS.EMPTY && cell.text.trim()) {
       setCellPending(cell.id);
+      if (isAdmin) {
+        setEditModalVisible({ visible: true, caseId: cell.id });
+      }
+    }
+    if (isActive && isAdmin && cell.status === CELL_STATUS.PENDING) {
+      setEditModalVisible({ visible: true, caseId: cell.id });
     }
   };
 
@@ -129,7 +142,6 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
       </View>
     );
   }
-
   const gridSize = game.gridSize ?? 3;
 
   return (
@@ -155,22 +167,27 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
             <GridCell
               text={item.text}
               status={item.status}
-              onPress={() => handleCellPress(item)}
+              onPress={() => {
+                handleCellPress(item);
+              }}
               disabled={game.status === GAME_STATUS.ENDED}
             />
             {isAdmin && item.status === CELL_STATUS.PENDING && (
-              <View className='flex-row gap-1 mt-1'>
-                <TouchableOpacity
-                  onPress={() => handleValidate(item.id)}
-                  className='flex-1 bg-green-700 py-1 rounded'>
-                  <Text className='text-white text-xs text-center'>✓</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleReject(item.id)}
-                  className='flex-1 bg-red-700 py-1 rounded'>
-                  <Text className='text-white text-xs text-center'>✕</Text>
-                </TouchableOpacity>
-              </View>
+              <EditProfileModal
+                visible={
+                  isEditModalVisible.visible &&
+                  isEditModalVisible.caseId === item.id
+                }
+                onClose={() =>
+                  setEditModalVisible({ visible: false, caseId: null })
+                }
+                onValidate={() => {
+                  handleValidate(item.id);
+                }}
+                onReject={() => {
+                  handleReject(item.id);
+                }}
+              />
             )}
           </View>
         )}
