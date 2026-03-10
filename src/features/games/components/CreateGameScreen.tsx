@@ -15,8 +15,6 @@ interface CreateGameScreenProps {
   onBack: () => void;
 }
 
-const GRID_OPTIONS = [3, 5] as const;
-
 export function CreateGameScreen({
   serverId,
   onCreated,
@@ -24,16 +22,20 @@ export function CreateGameScreen({
 }: CreateGameScreenProps) {
   const { user } = useAuth();
   const [name, setName] = useState("");
-  const [gridSize, setGridSize] = useState<3 | 5>(3);
+  const [maxCells, setMaxCells] = useState(9);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (!user?.uid || !name.trim()) return;
+    if (!maxCells || maxCells < 1) {
+      setError("Nombre max de cases invalide");
+      return;
+    }
     setError(null);
     setLoading(true);
     try {
-      await createGame(serverId, name.trim(), gridSize, user.uid);
+      await createGame(serverId, name.trim(), maxCells, user.uid);
       onCreated();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur");
@@ -55,23 +57,18 @@ export function CreateGameScreen({
         onChangeText={setName}
         className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
       />
-      <Text className='text-slate-400 mb-2'>Taille de la grille</Text>
-      <View className='flex-row gap-3 mb-6'>
-        {GRID_OPTIONS.map((size) => (
-          <TouchableOpacity
-            key={size}
-            onPress={() => setGridSize(size)}
-            className={`flex-1 py-4 rounded-xl ${
-              gridSize === size
-                ? "bg-slate-600"
-                : "bg-dark-card border border-dark-border"
-            }`}>
-            <Text className='text-white text-center font-semibold'>
-              {size}x{size}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <Text className='text-slate-400 mb-2'>Nombre maximum de cases</Text>
+      <TextInput
+        placeholder='9'
+        placeholderTextColor='#94a3b8'
+        value={String(maxCells)}
+        keyboardType='numeric'
+        onChangeText={(value) => {
+          const numberValue = Number(value.replace(/[^0-9]/g, ""));
+          setMaxCells(isNaN(numberValue) ? 0 : numberValue);
+        }}
+        className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
+      />
       <TouchableOpacity
         onPress={handleCreate}
         disabled={loading || !name.trim()}

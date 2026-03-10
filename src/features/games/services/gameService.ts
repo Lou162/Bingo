@@ -18,18 +18,20 @@ const GAMES = "games";
 export async function createGame(
   serverId: string,
   name: string,
-  gridSize: number,
-  createdBy: string
+  maxCells: number,
+  createdBy: string,
 ): Promise<string> {
+  const gridSize = Math.max(1, Math.ceil(Math.sqrt(maxCells)));
   const ref = await addDoc(collection(db, GAMES), {
     serverId,
     name,
     gridSize,
+    maxCells,
     status: GAME_STATUS.LOBBY,
     createdBy,
     createdAt: serverTimestamp(),
   });
-  const count = gridSize * gridSize;
+  const count = maxCells;
   await createEmptyCells(ref.id, count);
   return ref.id;
 }
@@ -41,10 +43,11 @@ export function subscribeGamesByServer(
       id: string;
       name: string;
       gridSize: number;
+      maxCells?: number;
       status: string;
       createdBy: string;
-    }>
-  ) => void
+    }>,
+  ) => void,
 ): () => void {
   const q = query(collection(db, GAMES), where("serverId", "==", serverId));
   return onSnapshot(q, (snapshot) => {

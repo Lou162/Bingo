@@ -26,7 +26,10 @@ export function ServerScreen({
       className='bg-dark-card rounded-xl p-4 mb-3 border border-dark-border'>
       <Text className='text-white font-semibold text-lg'>{item.name}</Text>
       <Text className='text-slate-400 text-sm'>
-        {item.gridSize}x{item.gridSize} · {item.status}
+        {item.maxCells
+          ? `max ${item.maxCells} cases`
+          : `${item.gridSize}x${item.gridSize}`}{" "}
+        · {item.status}
       </Text>
     </TouchableOpacity>
   );

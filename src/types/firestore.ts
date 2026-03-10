@@ -17,6 +17,7 @@ export interface GameDoc {
   serverId: string;
   name: string;
   gridSize: number;
+  maxCells?: number;
   status: GameStatus;
   createdBy: string;
   createdAt: { toDate: () => Date };

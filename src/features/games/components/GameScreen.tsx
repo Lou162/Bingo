@@ -59,12 +59,19 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const isAdmin = user?.uid && game?.createdBy === user.uid;
   const isLobby = game?.status === GAME_STATUS.LOBBY;
   const isActive = game?.status === GAME_STATUS.ACTIVE;
-  const gridFull =
-    cells.length > 0 &&
-    cells.every((c) => c.text.trim().length >= MIN_PREDICTION_LENGTH);
+
+  const maxCells =
+    game?.maxCells ?? (game?.gridSize ? game.gridSize * game.gridSize : 9);
+  const gridSize =
+    game?.gridSize ?? Math.max(1, Math.ceil(Math.sqrt(maxCells)));
+  const filledCellsCount = cells.filter(
+    (c) => c.text.trim().length >= MIN_PREDICTION_LENGTH,
+  ).length;
+  const canAddCell = isLobby && filledCellsCount < maxCells;
+  const canStart = isAdmin && filledCellsCount > 0;
 
   const handleStartGame = async () => {
-    if (!gridFull || !isAdmin) return;
+    if (!canStart || !isAdmin) return;
     setLoading(true);
     try {
       await startGame(gameId);
@@ -86,6 +93,12 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const handleCellPress = (cell: (typeof cells)[0]) => {
     if (!user?.uid) return;
     if (isLobby) {
+      if (
+        !canAddCell &&
+        (!cell.text.trim() || cell.status === CELL_STATUS.EMPTY)
+      ) {
+        return;
+      }
       if (cell.status === CELL_STATUS.EMPTY && !cell.text.trim()) {
         setEditCell({ id: cell.id, text: "" });
         setEditValue("");
@@ -142,7 +155,6 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
       </View>
     );
   }
-  const gridSize = game.gridSize ?? 3;
 
   return (
     <View className='flex-1 bg-dark-bg p-4 pt-14'>
@@ -196,12 +208,12 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
       {isAdmin && isLobby && (
         <TouchableOpacity
           onPress={handleStartGame}
-          disabled={!gridFull || loading}
+          disabled={!canStart || loading}
           className='bg-green-700 py-4 rounded-xl mt-4'>
           <Text className='text-white text-center font-semibold'>
-            {gridFull
-              ? "Lancer la partie"
-              : `Remplissez toute la grille (min ${MIN_PREDICTION_LENGTH} car. par case)`}
+            {canStart
+              ? `Lancer la partie (${filledCellsCount}/${maxCells} cases remplies)`
+              : `Ajoutez au moins 1 case pour lancer (max ${maxCells})`}
           </Text>
         </TouchableOpacity>
       )}
