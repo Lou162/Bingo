@@ -105,19 +105,17 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const handleCellPress = (cell: (typeof cells)[0]) => {
     if (!user?.uid) return;
     if (isLobby) {
-      if (
-        !canAddCell &&
-        (!cell.text.trim() || cell.status === CELL_STATUS.EMPTY)
-      ) {
+      if (cell.status !== CELL_STATUS.EMPTY) {
         return;
       }
-      if (cell.status === CELL_STATUS.EMPTY && !cell.text.trim()) {
+
+      const hasText = cell.text.trim().length > 0;
+
+      if (!hasText) {
+        if (!canAddCell && !isAdmin) return;
         setEditCell({ id: cell.id, text: "" });
         setEditValue("");
-      } else if (
-        cell.createdBy === user.uid &&
-        cell.status === CELL_STATUS.EMPTY
-      ) {
+      } else if (isAdmin) {
         setEditCell({ id: cell.id, text: cell.text });
         setEditValue(cell.text);
       }
