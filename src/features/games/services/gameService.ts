@@ -18,18 +18,21 @@ const GAMES = "games";
 export async function createGame(
   serverId: string,
   name: string,
-  gridSize: number,
-  createdBy: string
+  maxCells: number,
+  createdBy: string,
 ): Promise<string> {
+  const gridSize = Math.max(1, Math.ceil(Math.sqrt(maxCells)));
   const ref = await addDoc(collection(db, GAMES), {
     serverId,
     name,
     gridSize,
+    maxCells,
+    votesFrozen: false,
     status: GAME_STATUS.LOBBY,
     createdBy,
     createdAt: serverTimestamp(),
   });
-  const count = gridSize * gridSize;
+  const count = maxCells;
   await createEmptyCells(ref.id, count);
   return ref.id;
 }
@@ -41,10 +44,12 @@ export function subscribeGamesByServer(
       id: string;
       name: string;
       gridSize: number;
+      maxCells?: number;
+      votesFrozen?: boolean;
       status: string;
       createdBy: string;
-    }>
-  ) => void
+    }>,
+  ) => void,
 ): () => void {
   const q = query(collection(db, GAMES), where("serverId", "==", serverId));
   return onSnapshot(q, (snapshot) => {
@@ -68,6 +73,13 @@ export async function startGame(gameId: string): Promise<void> {
 
 export async function endGame(gameId: string): Promise<void> {
   await updateDoc(doc(db, GAMES, gameId), { status: GAME_STATUS.ENDED });
+}
+
+export async function setVotesFrozen(
+  gameId: string,
+  votesFrozen: boolean,
+): Promise<void> {
+  await updateDoc(doc(db, GAMES, gameId), { votesFrozen });
 }
 
 export async function getGame(gameId: string) {
