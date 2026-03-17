@@ -84,6 +84,10 @@ export function AuthScreen() {
     );
   }
 
+  function setError(arg0: null) {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <View className='flex-1 bg-dark-bg justify-center p-6'>
       <Text className='text-2xl font-bold text-white mb-6'>
