@@ -6,6 +6,7 @@ import {
   orderBy,
   onSnapshot,
   updateDoc,
+  getDoc,
   getDocs,
   writeBatch,
   serverTimestamp,
@@ -42,11 +43,40 @@ export async function createEmptyCells(
 export async function updateCellText(
   cellId: string,
   text: string,
-  createdBy: string,
+  editorId: string,
 ): Promise<void> {
-  await updateDoc(doc(db, CELLS, cellId), {
+  const cellRef = doc(db, CELLS, cellId);
+  const cellSnap = await getDoc(cellRef);
+
+  if (!cellSnap.exists()) return;
+
+  const cellData = cellSnap.data() as {
+    gameId?: string;
+    text?: string;
+    createdBy?: string;
+  };
+
+  const existingText = (cellData.text ?? "").trim();
+  const gameId = cellData.gameId;
+
+  let isEditorAdmin = false;
+  if (typeof gameId === "string" && gameId.length > 0) {
+    const gameSnap = await getDoc(doc(db, "games", gameId));
+    if (gameSnap.exists()) {
+      const gameData = gameSnap.data() as { createdBy?: string };
+      isEditorAdmin = gameData.createdBy === editorId;
+    }
+  }
+
+  if (existingText.length > 0 && !isEditorAdmin) return;
+
+  const resolvedCreatedBy = isEditorAdmin
+    ? (cellData.createdBy ?? "").trim() || editorId
+    : editorId;
+
+  await updateDoc(cellRef, {
     text: text.trim(),
-    createdBy,
+    createdBy: resolvedCreatedBy,
     createdAt: serverTimestamp(),
   });
 }

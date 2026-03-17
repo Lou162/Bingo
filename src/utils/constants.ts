@@ -1,4 +1,4 @@
-export const MIN_PREDICTION_LENGTH = 10;
+export const MIN_PREDICTION_LENGTH = 2;
 
 export const GAME_STATUS = {
   LOBBY: "lobby",
