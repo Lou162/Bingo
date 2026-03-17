@@ -116,14 +116,38 @@ export async function setCellValidated(
   cellId: string,
   validatedBy: string,
 ): Promise<void> {
-  await updateDoc(doc(db, CELLS, cellId), {
+  const cellRef = doc(db, CELLS, cellId);
+  const cellSnap = await getDoc(cellRef);
+  if (!cellSnap.exists()) return;
+
+  const { gameId } = cellSnap.data() as { gameId?: string };
+  if (!gameId) return;
+
+  const gameSnap = await getDoc(doc(db, "games", gameId));
+  if (!gameSnap.exists()) return;
+
+  if (!(gameSnap.data() as { votesFrozen?: boolean }).votesFrozen) return;
+
+  await updateDoc(cellRef, {
     status: CELL_STATUS.VALIDATED,
     validatedBy,
   });
 }
 
 export async function setCellRejected(cellId: string): Promise<void> {
-  await updateDoc(doc(db, CELLS, cellId), { status: CELL_STATUS.REJECTED });
+  const cellRef = doc(db, CELLS, cellId);
+  const cellSnap = await getDoc(cellRef);
+  if (!cellSnap.exists()) return;
+
+  const { gameId } = cellSnap.data() as { gameId?: string };
+  if (!gameId) return;
+
+  const gameSnap = await getDoc(doc(db, "games", gameId));
+  if (!gameSnap.exists()) return;
+
+  if (!(gameSnap.data() as { votesFrozen?: boolean }).votesFrozen) return;
+
+  await updateDoc(cellRef, { status: CELL_STATUS.REJECTED });
 }
 
 export async function rejectNonFinalNonEmptyCells(

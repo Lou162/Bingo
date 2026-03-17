@@ -30,6 +30,7 @@ import {
   MIN_PREDICTION_LENGTH,
 } from "../../../utils/constants";
 import { EditProfileModal } from "./GameValidationModal";
+import { EndGameScreen } from "./EndGameScreen";
 
 interface GameScreenProps {
   gameId: string;
@@ -40,10 +41,11 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const { user } = useAuth();
   const game = useGame(gameId);
   const cells = useCells(gameId);
-  const userIds = useMemo(
-    () => [...new Set(cells.map((c) => c.createdBy).filter(Boolean))],
-    [cells],
-  );
+  const userIds = useMemo(() => {
+    const createdByUsers = cells.map((c) => c.createdBy).filter(Boolean);
+    const voters = cells.flatMap((c) => c.selectedBy ?? []);
+    return [...new Set([...createdByUsers, ...voters])];
+  }, [cells]);
   const displayNames = useDisplayNames(userIds);
   const leaderboard = useLeaderboard(cells, displayNames);
 
@@ -140,8 +142,9 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
 
   const handleCellLongPress = (cell: (typeof cells)[0]) => {
     if (!isAdmin || !isActive || !cell.text.trim()) return;
+    if (!votesFrozen) return;
 
-    // Phase 3 conservee: l'admin bascule une case en pending, puis valide/rejette.
+    // Phase 3 : l'admin valide/rejette uniquement une fois les votes gelés.
     if (cell.status === CELL_STATUS.EMPTY) {
       void setCellPending(cell.id);
       setEditModalVisible({ visible: true, caseId: cell.id });
@@ -165,12 +168,12 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   };
 
   const handleValidate = (cellId: string) => {
-    if (!isAdmin || !user?.uid) return;
+    if (!isAdmin || !user?.uid || !votesFrozen) return;
     setCellValidated(cellId, user.uid);
   };
 
   const handleReject = (cellId: string) => {
-    if (!isAdmin) return;
+    if (!isAdmin || !votesFrozen) return;
     setCellRejected(cellId);
   };
 
@@ -182,6 +185,19 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
           color='#fff'
         />
       </View>
+    );
+  }
+
+  if (game.status === GAME_STATUS.ENDED) {
+    return (
+      <EndGameScreen
+        gameName={game.name}
+        allUserIds={userIds}
+        displayNames={displayNames}
+        entries={leaderboard}
+        currentUserId={user?.uid ?? undefined}
+        onBack={onBack}
+      />
     );
   }
 
@@ -220,7 +236,7 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
               }}
               disabled={game.status === GAME_STATUS.ENDED}
             />
-            {isAdmin && item.status === CELL_STATUS.PENDING && (
+            {isAdmin && votesFrozen && item.status === CELL_STATUS.PENDING && (
               <EditProfileModal
                 visible={
                   isEditModalVisible.visible &&
