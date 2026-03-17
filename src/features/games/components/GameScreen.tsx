@@ -39,13 +39,13 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const cells = useCells(gameId);
   const userIds = useMemo(
     () => [...new Set(cells.map((c) => c.createdBy).filter(Boolean))],
-    [cells]
+    [cells],
   );
   const displayNames = useDisplayNames(userIds);
   const leaderboard = useLeaderboard(cells, displayNames);
 
   const [editCell, setEditCell] = useState<{ id: string; text: string } | null>(
-    null
+    null,
   );
   const [editValue, setEditValue] = useState("");
   const [loading, setLoading] = useState(false);
@@ -158,22 +158,20 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
               onPress={() => handleCellPress(item)}
               disabled={game.status === GAME_STATUS.ENDED}
             />
-            {isAdmin &&
-              item.status === CELL_STATUS.PENDING &&
-              item.createdBy !== user?.uid && (
-                <View className='flex-row gap-1 mt-1'>
-                  <TouchableOpacity
-                    onPress={() => handleValidate(item.id)}
-                    className='flex-1 bg-green-700 py-1 rounded'>
-                    <Text className='text-white text-xs text-center'>✓</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => handleReject(item.id)}
-                    className='flex-1 bg-red-700 py-1 rounded'>
-                    <Text className='text-white text-xs text-center'>✕</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+            {isAdmin && item.status === CELL_STATUS.PENDING && (
+              <View className='flex-row gap-1 mt-1'>
+                <TouchableOpacity
+                  onPress={() => handleValidate(item.id)}
+                  className='flex-1 bg-green-700 py-1 rounded'>
+                  <Text className='text-white text-xs text-center'>✓</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleReject(item.id)}
+                  className='flex-1 bg-red-700 py-1 rounded'>
+                  <Text className='text-white text-xs text-center'>✕</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         )}
       />

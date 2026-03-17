@@ -41,12 +41,14 @@ export function JoinServerScreen({ onJoined, onBack }: JoinServerScreenProps) {
       </Text>
       {error ? <Text className='text-red-400 mb-4'>{error}</Text> : null}
       <TextInput
-        placeholder='Code du serveur'
+        placeholder='Ex. ABC123'
         placeholderTextColor='#94a3b8'
         value={code}
-        onChangeText={setCode}
+        onChangeText={(t) => setCode(t.toUpperCase().slice(0, 6))}
         autoCapitalize='characters'
-        className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
+        autoCorrect={false}
+        maxLength={6}
+        className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6 font-mono text-lg'
       />
       <TouchableOpacity
         onPress={handleJoin}
