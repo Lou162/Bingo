@@ -126,6 +126,39 @@ export async function setCellRejected(cellId: string): Promise<void> {
   await updateDoc(doc(db, CELLS, cellId), { status: CELL_STATUS.REJECTED });
 }
 
+export async function rejectNonFinalNonEmptyCells(
+  gameId: string,
+): Promise<void> {
+  const q = query(collection(db, CELLS), where("gameId", "==", gameId));
+  const snap = await getDocs(q);
+
+  const batch = writeBatch(db);
+  let updateCount = 0;
+
+  snap.docs.forEach((cellDoc) => {
+    const data = cellDoc.data() as {
+      text?: string;
+      status?: string;
+    };
+
+    const text = (data.text ?? "").trim();
+    const status = data.status;
+    const isFinalStatus =
+      status === CELL_STATUS.VALIDATED || status === CELL_STATUS.REJECTED;
+
+    if (!text || isFinalStatus) return;
+
+    batch.update(doc(db, CELLS, cellDoc.id), {
+      status: CELL_STATUS.REJECTED,
+    });
+    updateCount += 1;
+  });
+
+  if (updateCount > 0) {
+    await batch.commit();
+  }
+}
+
 export async function toggleCellSelection(
   cellId: string,
   userId: string,

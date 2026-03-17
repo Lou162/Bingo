@@ -21,6 +21,7 @@ import {
   setCellPending,
   setCellValidated,
   setCellRejected,
+  rejectNonFinalNonEmptyCells,
   toggleCellSelection,
 } from "../services/cellService";
 import {
@@ -86,6 +87,7 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
     if (!isAdmin) return;
     setLoading(true);
     try {
+      await rejectNonFinalNonEmptyCells(gameId);
       await endGame(gameId);
     } finally {
       setLoading(false);
