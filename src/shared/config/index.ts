@@ -1,1 +1,7 @@
-export { app, auth, db } from "./firebase";
+export {
+  app,
+  auth,
+  db,
+  googleWebClientId,
+  googleIosClientId,
+} from "./firebase";

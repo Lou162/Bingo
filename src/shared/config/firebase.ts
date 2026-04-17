@@ -3,9 +3,12 @@ import { getAuth, type Auth } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
 
 const apiKey = process.env.EXPO_PUBLIC_FIREBASE_API_KEY;
+const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "";
+// CLIENT_ID from GoogleService-Info.plist (iOS OAuth 2.0 client)
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? "";
 if (!apiKey?.trim()) {
   throw new Error(
-    "Firebase: clé API manquante. Créez un fichier .env à la racine (copiez .env.example) avec EXPO_PUBLIC_FIREBASE_API_KEY, puis redémarrez avec 'npx expo start -c'."
+    "Firebase: clé API manquante. Créez un fichier .env à la racine (copiez .env.example) avec EXPO_PUBLIC_FIREBASE_API_KEY, puis redémarrez avec 'npx expo start -c'.",
   );
 }
 
@@ -32,4 +35,4 @@ if (!getApps().length) {
   db = getFirestore(app);
 }
 
-export { app, auth, db };
+export { app, auth, db, googleWebClientId, googleIosClientId };

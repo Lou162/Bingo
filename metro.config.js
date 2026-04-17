@@ -2,7 +2,8 @@ const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
 
 const config = getDefaultConfig(__dirname);
-// Compatibilité Firebase Auth avec Expo SDK 53+ (évite "Component auth has not been registered yet")
+
+// Compatibilité Firebase Auth avec Expo SDK 53+
 config.resolver.sourceExts.push("cjs");
 config.resolver.unstable_enablePackageExports = false;
 

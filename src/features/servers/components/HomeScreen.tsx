@@ -24,19 +24,29 @@ export function HomeScreen({
       <Text className='text-slate-400 text-sm'>
         {item.members.length} membre(s)
       </Text>
+      <Text className='text-slate-400 text-sm'>
+        Créé par {item.createdBy} ·{" "}
+        {item.createdAt.toDate().toLocaleDateString("fr-FR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View className='flex-1 bg-dark-bg p-6 pt-14'>
-      <Text className='text-2xl font-bold text-white mb-2'>NightBingo</Text>
-      <Text className='text-slate-400 mb-6'>Vos serveurs</Text>
+      <Text className='text-2xl font-bold text-white mb-2'>AperoBingo</Text>
+      <Text className='text-slate-400 mb-6'>Vos salons</Text>
       <FlatList
         data={servers}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         ListEmptyComponent={
-          <Text className='text-slate-500 py-4'>Aucun serveur</Text>
+          <Text className='text-slate-500 py-4'>Aucun salon</Text>
         }
       />
       <View className='flex-row gap-3 mt-4'>
@@ -44,14 +54,14 @@ export function HomeScreen({
           onPress={onCreateServer}
           className='flex-1 bg-slate-600 py-4 rounded-xl'>
           <Text className='text-white text-center font-semibold'>
-            Créer un serveur
+            Créer un salon
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={onJoinServer}
           className='flex-1 border border-slate-500 py-4 rounded-xl'>
           <Text className='text-white text-center font-semibold'>
-            Rejoindre
+            Rejoindre un salon
           </Text>
         </TouchableOpacity>
       </View>

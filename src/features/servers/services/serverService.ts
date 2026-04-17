@@ -19,16 +19,14 @@ const CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 function generateServerCode(): string {
   let code = "";
   for (let i = 0; i < CODE_LENGTH; i++) {
-    code += CODE_CHARS.charAt(
-      Math.floor(Math.random() * CODE_CHARS.length)
-    );
+    code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
   }
   return code;
 }
 
 export async function createServer(
   name: string,
-  createdBy: string
+  createdBy: string,
 ): Promise<string> {
   const maxAttempts = 5;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -49,12 +47,11 @@ export async function createServer(
 
 export async function joinServerByCode(
   serverCode: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
   const trimmed = serverCode.trim();
   if (!trimmed) throw new Error("Code invalide");
-  const code =
-    trimmed.length === CODE_LENGTH ? trimmed.toUpperCase() : trimmed;
+  const code = trimmed.length === CODE_LENGTH ? trimmed.toUpperCase() : trimmed;
   const serverRef = doc(db, SERVERS, code);
   const snap = await getDoc(serverRef);
   if (!snap.exists()) throw new Error("Serveur introuvable. Vérifie le code.");
@@ -65,9 +62,27 @@ export async function joinServerByCode(
 }
 
 export async function getServer(serverId: string) {
+  console.log("Fetching server with ID:", serverId);
   const snap = await getDoc(doc(db, SERVERS, serverId));
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
+  const sortedData = snap
+    .data()
+    .sort(
+      (
+        a: { createdAt: { toDate: () => any } },
+        b: { createdAt: { toDate: () => any } },
+      ) => {
+        console.log("Comparing", a.createdAt.toDate(), b.createdAt.toDate());
+        const dateA = a.createdAt.toDate();
+        const dateB = b.createdAt.toDate();
+        if (dateA > dateB) {
+          return -1; // return -1 here for DESC order
+        }
+        return 1;
+      },
+    );
+  console.log("Sorted data:", sortedData);
+  return { id: sortedData.id, ...sortedData.data() };
 }
 
 export function subscribeServersForUser(
@@ -78,12 +93,12 @@ export function subscribeServersForUser(
       name: string;
       createdBy: string;
       members: string[];
-    }>
-  ) => void
+    }>,
+  ) => void,
 ): () => void {
   const q = query(
     collection(db, SERVERS),
-    where("members", "array-contains", userId)
+    where("members", "array-contains", userId),
   );
   return onSnapshot(q, (snapshot) => {
     const servers = snapshot.docs.map((d) => ({

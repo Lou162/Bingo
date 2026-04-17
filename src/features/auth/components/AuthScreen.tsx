@@ -7,12 +7,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "../hooks/useAuth";
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 
 export function AuthScreen() {
   const {
     signInAnonymously,
     signInWithEmail,
     signUpWithEmail,
+    signInWithGoogle,
     loading,
     error,
   } = useAuth();
@@ -26,6 +28,15 @@ export function AuthScreen() {
     setSubmitting(true);
     try {
       await signInAnonymously();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setSubmitting(true);
+    try {
+      await signInWithGoogle();
     } finally {
       setSubmitting(false);
     }
@@ -48,7 +59,7 @@ export function AuthScreen() {
     return (
       <View className='flex-1 bg-dark-bg justify-center p-6'>
         <Text className='text-3xl font-bold text-white text-center mb-2'>
-          NightBingo
+          AperoBingo
         </Text>
         <Text className='text-slate-400 text-center mb-8'>
           Social prediction bingo
@@ -75,6 +86,12 @@ export function AuthScreen() {
             Se connecter avec email
           </Text>
         </TouchableOpacity>
+        <GoogleSigninButton
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          disabled={loading || submitting}
+          onPress={handleGoogleSignIn}
+        />
         <TouchableOpacity
           onPress={() => setMode("signUp")}
           className='py-4'>
@@ -82,10 +99,6 @@ export function AuthScreen() {
         </TouchableOpacity>
       </View>
     );
-  }
-
-  function setError(arg0: null) {
-    throw new Error("Function not implemented.");
   }
 
   return (
@@ -133,7 +146,6 @@ export function AuthScreen() {
       <TouchableOpacity
         onPress={() => {
           setMode("choice");
-          setError(null);
         }}>
         <Text className='text-slate-400 text-center'>Retour</Text>
       </TouchableOpacity>

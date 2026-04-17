@@ -14,16 +14,27 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nightbingo.app"
+      "bundleIdentifier": "com.nightbingo.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0f172a"
       },
+      "googleServicesFile": "./google-services.json",
       "package": "com.nightbingo.app"
     },
     "plugins": [
-      "expo-asset"
-    ]
+      "expo-asset",
+      "@react-native-firebase/app"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f55f089c-ab81-4ae6-bbeb-e9a77cb6593a"
+      }
+    }
   }
 }

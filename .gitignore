@@ -4,6 +4,9 @@
 # Dependencies
 node_modules/
 
+# Android
+android/
+
 # Build / cache
 dist/
 *.tsbuildinfo
@@ -12,6 +15,14 @@ dist/
 .env
 .env.local
 .env.*.local
+
+# Firebase / Google config (sensible)
+google-services.json
+GoogleService-Info.plist
+
+# Android signing keys
+*.keystore
+*.jks
 
 # OS
 .DS_Store
