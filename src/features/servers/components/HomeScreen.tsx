@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useServers } from "../hooks/useServers";
 import type { ServerWithId } from "../types";
 
@@ -15,6 +22,9 @@ export function HomeScreen({
   onOpenServer,
 }: HomeScreenProps) {
   const servers = useServers();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  const actionBottomSpacing = Math.max(72, Math.round(height * 0.16));
 
   const renderItem = ({ item }: { item: ServerWithId }) => (
     <TouchableOpacity
@@ -24,21 +34,13 @@ export function HomeScreen({
       <Text className='text-slate-400 text-sm'>
         {item.members.length} membre(s)
       </Text>
-      <Text className='text-slate-400 text-sm'>
-        Créé par {item.createdBy} ·{" "}
-        {item.createdAt.toDate().toLocaleDateString("fr-FR", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-        })}
-      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View className='flex-1 bg-dark-bg p-6 pt-14'>
+    <View
+      className='flex-1 bg-dark-bg p-6 pt-14'
+      style={{ paddingBottom: Math.max(insets.bottom, 12) + 16 }}>
       <Text className='text-2xl font-bold text-white mb-2'>AperoBingo</Text>
       <Text className='text-slate-400 mb-6'>Vos salons</Text>
       <FlatList
@@ -49,7 +51,9 @@ export function HomeScreen({
           <Text className='text-slate-500 py-4'>Aucun salon</Text>
         }
       />
-      <View className='flex-row gap-3 mt-4'>
+      <View
+        className='flex-row gap-3 mt-4'
+        style={{ marginBottom: actionBottomSpacing }}>
         <TouchableOpacity
           onPress={onCreateServer}
           className='flex-1 bg-slate-600 py-4 rounded-xl'>

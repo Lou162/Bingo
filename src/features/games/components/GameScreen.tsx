@@ -7,7 +7,9 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../auth";
 import { useGame } from "../hooks/useGame";
 import { useCells } from "../hooks/useCells";
@@ -39,6 +41,8 @@ interface GameScreenProps {
 
 export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const game = useGame(gameId);
   const cells = useCells(gameId);
   const userIds = useMemo(() => {
@@ -74,6 +78,10 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
   const canAddCell = isLobby && filledCellsCount < maxCells;
   const gridFull = filledCellsCount >= 1 && filledCellsCount <= maxCells;
   const canStart = isAdmin && gridFull;
+  const actionBottomSpacing = Math.max(
+    72,
+    Math.round(height * 0.16) + Math.max(insets.bottom, 12),
+  );
 
   const handleStartGame = async () => {
     if (!canStart || !isAdmin) return;
@@ -258,16 +266,18 @@ export function GameScreen({ gameId, onBack }: GameScreenProps) {
       />
 
       {isAdmin && isLobby && (
-        <TouchableOpacity
-          onPress={handleStartGame}
-          disabled={!canStart || loading}
-          className='bg-green-700 py-4 rounded-xl mt-4'>
-          <Text className='text-white text-center font-semibold'>
-            {canStart
-              ? `Lancer la partie (${filledCellsCount}/${maxCells} cases remplies)`
-              : `Terminez la grille avant de lancer (${filledCellsCount}/${maxCells})`}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ marginBottom: actionBottomSpacing }}>
+          <TouchableOpacity
+            onPress={handleStartGame}
+            disabled={!canStart || loading}
+            className='bg-green-700 py-4 rounded-xl mt-4'>
+            <Text className='text-white text-center font-semibold'>
+              {canStart
+                ? `Lancer la partie (${filledCellsCount}/${maxCells} cases remplies)`
+                : `Terminez la grille avant de lancer (${filledCellsCount}/${maxCells})`}
+            </Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       {isActive && (

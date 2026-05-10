@@ -62,27 +62,9 @@ export async function joinServerByCode(
 }
 
 export async function getServer(serverId: string) {
-  console.log("Fetching server with ID:", serverId);
   const snap = await getDoc(doc(db, SERVERS, serverId));
   if (!snap.exists()) return null;
-  const sortedData = snap
-    .data()
-    .sort(
-      (
-        a: { createdAt: { toDate: () => any } },
-        b: { createdAt: { toDate: () => any } },
-      ) => {
-        console.log("Comparing", a.createdAt.toDate(), b.createdAt.toDate());
-        const dateA = a.createdAt.toDate();
-        const dateB = b.createdAt.toDate();
-        if (dateA > dateB) {
-          return -1; // return -1 here for DESC order
-        }
-        return 1;
-      },
-    );
-  console.log("Sorted data:", sortedData);
-  return { id: sortedData.id, ...sortedData.data() };
+  return { id: snap.id, ...snap.data() };
 }
 
 export function subscribeServersForUser(

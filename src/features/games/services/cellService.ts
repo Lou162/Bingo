@@ -3,7 +3,6 @@ import {
   doc,
   query,
   where,
-  orderBy,
   onSnapshot,
   updateDoc,
   getDoc,
@@ -84,28 +83,41 @@ export async function updateCellText(
 export function subscribeCellsByGame(
   gameId: string,
   onUpdate: (cells: CellData[]) => void,
+  onError?: (error: Error) => void,
 ): () => void {
-  const q = query(
-    collection(db, CELLS),
-    where("gameId", "==", gameId),
-    orderBy("index", "asc"),
+  const q = query(collection(db, CELLS), where("gameId", "==", gameId));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const cells = snapshot.docs
+        .map((d) => {
+          const data = d.data();
+          return {
+            id: d.id,
+            gameId: data.gameId,
+            index:
+              typeof data.index === "number"
+                ? data.index
+                : Number.MAX_SAFE_INTEGER,
+            text: data.text ?? "",
+            createdBy: data.createdBy,
+            selectedBy: Array.isArray(data.selectedBy) ? data.selectedBy : [],
+            status: data.status ?? CELL_STATUS.EMPTY,
+            validatedBy: data.validatedBy,
+            createdAt: data.createdAt?.toDate?.() ?? new Date(),
+          } as CellData;
+        })
+        .sort(
+          (a, b) =>
+            (a.index ?? Number.MAX_SAFE_INTEGER) -
+            (b.index ?? Number.MAX_SAFE_INTEGER),
+        );
+      onUpdate(cells);
+    },
+    (error) => {
+      onError?.(error as Error);
+    },
   );
-  return onSnapshot(q, (snapshot) => {
-    const cells = snapshot.docs.map((d) => {
-      const data = d.data();
-      return {
-        id: d.id,
-        gameId: data.gameId,
-        text: data.text ?? "",
-        createdBy: data.createdBy,
-        selectedBy: Array.isArray(data.selectedBy) ? data.selectedBy : [],
-        status: data.status ?? CELL_STATUS.EMPTY,
-        validatedBy: data.validatedBy,
-        createdAt: data.createdAt?.toDate?.() ?? new Date(),
-      } as CellData;
-    });
-    onUpdate(cells);
-  });
 }
 
 export async function setCellPending(cellId: string): Promise<void> {
@@ -196,11 +208,15 @@ export async function toggleCellSelection(
 export async function getCellsForGame(
   gameId: string,
 ): Promise<{ id: string; index: number }[]> {
-  const q = query(
-    collection(db, CELLS),
-    where("gameId", "==", gameId),
-    orderBy("index", "asc"),
-  );
+  const q = query(collection(db, CELLS), where("gameId", "==", gameId));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, index: d.data().index }));
+  return snap.docs
+    .map((d) => ({
+      id: d.id,
+      index:
+        typeof d.data().index === "number"
+          ? (d.data().index as number)
+          : Number.MAX_SAFE_INTEGER,
+    }))
+    .sort((a, b) => a.index - b.index);
 }

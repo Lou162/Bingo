@@ -10,7 +10,10 @@ export function useCells(gameId: string): CellData[] {
       setCells([]);
       return;
     }
-    const unsub = subscribeCellsByGame(gameId, setCells);
+    const unsub = subscribeCellsByGame(gameId, setCells, (error) => {
+      console.error("subscribeCellsByGame failed:", error.message);
+      setCells([]);
+    });
     return unsub;
   }, [gameId]);
 

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   View,
   Text,
   TextInput,
@@ -45,43 +47,48 @@ export function CreateGameScreen({
   };
 
   return (
-    <View className='flex-1 bg-dark-bg p-6 pt-14'>
-      <Text className='text-2xl font-bold text-white mb-6'>
-        Nouvelle partie
-      </Text>
-      {error ? <Text className='text-red-400 mb-4'>{error}</Text> : null}
-      <TextInput
-        placeholder='Nom de la partie'
-        placeholderTextColor='#94a3b8'
-        value={name}
-        onChangeText={setName}
-        className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
-      />
-      <Text className='text-slate-400 mb-2'>Nombre maximum de cases</Text>
-      <TextInput
-        placeholder='9'
-        placeholderTextColor='#94a3b8'
-        value={String(maxCells)}
-        keyboardType='numeric'
-        onChangeText={(value) => {
-          const numberValue = Number(value.replace(/[^0-9]/g, ""));
-          setMaxCells(isNaN(numberValue) ? 0 : numberValue);
-        }}
-        className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
-      />
-      <TouchableOpacity
-        onPress={handleCreate}
-        disabled={loading || !name.trim()}
-        className='bg-slate-600 py-4 rounded-xl mb-4'>
-        {loading ? (
-          <ActivityIndicator color='#fff' />
-        ) : (
-          <Text className='text-white text-center font-semibold'>Créer</Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity onPress={onBack}>
-        <Text className='text-slate-400 text-center'>Retour</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView
+      className='flex-1 bg-dark-bg'
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={16}>
+      <View className='flex-1 p-6 pt-14 pb-10'>
+        <Text className='text-2xl font-bold text-white mb-6'>
+          Nouvelle partie
+        </Text>
+        {error ? <Text className='text-red-400 mb-4'>{error}</Text> : null}
+        <TextInput
+          placeholder='Nom de la partie'
+          placeholderTextColor='#94a3b8'
+          value={name}
+          onChangeText={setName}
+          className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
+        />
+        <Text className='text-slate-400 mb-2'>Nombre maximum de cases</Text>
+        <TextInput
+          placeholder='9'
+          placeholderTextColor='#94a3b8'
+          value={String(maxCells)}
+          keyboardType='numeric'
+          onChangeText={(value) => {
+            const numberValue = Number(value.replace(/[^0-9]/g, ""));
+            setMaxCells(isNaN(numberValue) ? 0 : numberValue);
+          }}
+          className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6'
+        />
+        <TouchableOpacity
+          onPress={handleCreate}
+          disabled={loading || !name.trim()}
+          className='bg-slate-600 py-4 rounded-xl mb-4'>
+          {loading ? (
+            <ActivityIndicator color='#fff' />
+          ) : (
+            <Text className='text-white text-center font-semibold'>Créer</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onBack}>
+          <Text className='text-slate-400 text-center'>Retour</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

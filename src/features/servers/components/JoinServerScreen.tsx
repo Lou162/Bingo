@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   View,
   Text,
   TextInput,
@@ -35,36 +37,41 @@ export function JoinServerScreen({ onJoined, onBack }: JoinServerScreenProps) {
   };
 
   return (
-    <View className='flex-1 bg-dark-bg p-6 pt-14'>
-      <Text className='text-2xl font-bold text-white mb-6'>
-        Rejoindre un serveur
-      </Text>
-      {error ? <Text className='text-red-400 mb-4'>{error}</Text> : null}
-      <TextInput
-        placeholder='Ex. ABC123'
-        placeholderTextColor='#94a3b8'
-        value={code}
-        onChangeText={(t) => setCode(t.toUpperCase().slice(0, 6))}
-        autoCapitalize='characters'
-        autoCorrect={false}
-        maxLength={6}
-        className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6 font-mono text-lg'
-      />
-      <TouchableOpacity
-        onPress={handleJoin}
-        disabled={loading || !code.trim()}
-        className='bg-slate-600 py-4 rounded-xl mb-4'>
-        {loading ? (
-          <ActivityIndicator color='#fff' />
-        ) : (
-          <Text className='text-white text-center font-semibold'>
-            Rejoindre
-          </Text>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity onPress={onBack}>
-        <Text className='text-slate-400 text-center'>Retour</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView
+      className='flex-1 bg-dark-bg'
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={16}>
+      <View className='flex-1 p-6 pt-14 pb-10'>
+        <Text className='text-2xl font-bold text-white mb-6'>
+          Rejoindre un serveur
+        </Text>
+        {error ? <Text className='text-red-400 mb-4'>{error}</Text> : null}
+        <TextInput
+          placeholder='Ex. ABC123'
+          placeholderTextColor='#94a3b8'
+          value={code}
+          onChangeText={(t) => setCode(t.toUpperCase().slice(0, 6))}
+          autoCapitalize='characters'
+          autoCorrect={false}
+          maxLength={6}
+          className='bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white mb-6 font-mono text-lg'
+        />
+        <TouchableOpacity
+          onPress={handleJoin}
+          disabled={loading || !code.trim()}
+          className='bg-slate-600 py-4 rounded-xl mb-4'>
+          {loading ? (
+            <ActivityIndicator color='#fff' />
+          ) : (
+            <Text className='text-white text-center font-semibold'>
+              Rejoindre
+            </Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onBack}>
+          <Text className='text-slate-400 text-center'>Retour</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

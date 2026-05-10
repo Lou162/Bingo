@@ -62,7 +62,15 @@ export function subscribeGamesByServer(
       gridSize: number;
       status: string;
       createdBy: string;
+      createdAt?: { toMillis?: () => number };
     }>;
+
+    games.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis?.() ?? 0;
+      const bTime = b.createdAt?.toMillis?.() ?? 0;
+      return bTime - aTime;
+    });
+
     onUpdate(games);
   });
 }
