@@ -12,8 +12,9 @@ export interface AuthContextValue extends AuthState {
   signUpWithEmail: (
     email: string,
     password: string,
-    displayName: string
+    displayName: string,
   ) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   setDisplayName: (name: string) => Promise<void>;
 }

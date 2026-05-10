@@ -1,0 +1,62 @@
+{
+  "cli": {
+    "version": ">= 18.6.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "GOOGLE_SERVICES_JSON": "dev",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyAR29U4AdkIJBa7RONMtxUTK0ef6ZuTC4c",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "bingonight-dev.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "bingonight-dev",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "bingonight-dev.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "708951444925",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:708951444925:web:cac0b52d50170ab21896d4",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "708951444925-46kli71p7fr515b42r2rhtu9hr8koerv.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "708951444925-nid5der4pai9u2t42gqjuee33a0d9ub4.apps.googleusercontent.com"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "GOOGLE_SERVICES_JSON": "dev",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyAR29U4AdkIJBa7RONMtxUTK0ef6ZuTC4c",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "bingonight-dev.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "bingonight-dev",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "bingonight-dev.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "708951444925",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:708951444925:web:cac0b52d50170ab21896d4",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "708951444925-46kli71p7fr515b42r2rhtu9hr8koerv.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "708951444925-nid5der4pai9u2t42gqjuee33a0d9ub4.apps.googleusercontent.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "releaseChannel": "production",
+      "env": {
+        "GOOGLE_SERVICES_JSON": "production",
+        "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDT0vRl1w7TtUQPc_Y-_NQYcHPkpsk2ZU0",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "bingonight-6e8f5.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "bingonight-6e8f5",
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "bingonight-6e8f5.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "749965370613",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:749965370613:web:4f9cde7482c73162ded1bc",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "749965370613-i1mad1d9uqngukekra21jirbvbfp3lgc.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID": "708951444925-nid5der4pai9u2t42gqjuee33a0d9ub4.apps.googleusercontent.com"
+      },
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "app-bundle",
+        "credentialsSource": "local"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

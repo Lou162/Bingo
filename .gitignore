@@ -4,6 +4,9 @@
 # Dependencies
 node_modules/
 
+# Android
+/android/
+
 # Build / cache
 dist/
 *.tsbuildinfo
@@ -12,6 +15,36 @@ dist/
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
+
+# Firebase / Google config (sensible)
+google-services.json
+GoogleService-Info.plist
+google-services-production.json
+google-services-staging.json
+google-services-dev.json
+google-services-*.json
+*-services.json
+
+# Android signing keys
+*.keystore
+*.jks
+credentials.json
+credentials/
+*.p12
+*.p8
+*.pem
+
+# Android build artifacts
+*.apk
+*.aab
+*.apks
+
+# Service account and local firebase credential dumps
+*-firebase-adminsdk-*.json
+bingonight-*.json
+firebase/**/*.json
 
 # OS
 .DS_Store
@@ -20,3 +53,4 @@ Thumbs.db
 # IDE
 *.log
 npm-debug.log*
+

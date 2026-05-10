@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useGames } from "../../games/hooks/useGames";
 import type { GameWithId } from "../../games/types";
 
@@ -19,6 +26,12 @@ export function ServerScreen({
   onBack,
 }: ServerScreenProps) {
   const games = useGames(serverId);
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  const actionBottomSpacing = Math.max(
+    72,
+    Math.round(height * 0.16) + Math.max(insets.bottom, 12),
+  );
 
   const renderItem = ({ item }: { item: GameWithId }) => (
     <TouchableOpacity
@@ -51,13 +64,15 @@ export function ServerScreen({
           <Text className='text-slate-500 py-4'>Aucune partie</Text>
         }
       />
-      <TouchableOpacity
-        onPress={onCreateGame}
-        className='bg-slate-600 py-4 rounded-xl mt-4'>
-        <Text className='text-white text-center font-semibold'>
-          Créer une partie
-        </Text>
-      </TouchableOpacity>
+      <View style={{ marginBottom: actionBottomSpacing }}>
+        <TouchableOpacity
+          onPress={onCreateGame}
+          className='bg-slate-600 py-4 rounded-xl mt-4'>
+          <Text className='text-white text-center font-semibold'>
+            Créer une grille
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

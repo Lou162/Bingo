@@ -6,9 +6,14 @@ import React, {
   useCallback,
 } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../../shared/config";
+import {
+  auth,
+  googleWebClientId,
+  googleIosClientId,
+} from "../../../shared/config/firebase";
 import * as authService from "../services/authService";
 import type { AuthContextValue } from "../types";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -19,6 +24,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, setUser);
+    if (!googleWebClientId.trim()) {
+      console.warn(
+        "Google Sign-In: EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID is missing. Google auth can fail until configured.",
+      );
+    }
+    GoogleSignin.configure({
+      webClientId: googleWebClientId,
+      iosClientId: googleIosClientId || undefined,
+      offlineAccess: false,
+    });
     setLoading(false);
     return unsub;
   }, []);
@@ -43,8 +58,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw e;
       }
     },
-    []
+    [],
   );
+
+  const signInWithGoogle = useCallback(async () => {
+    setError(null);
+    try {
+      await authService.googleSignIn();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Google sign-in failed");
+      throw e;
+    }
+  }, []);
 
   const signUpWithEmail = useCallback(
     async (email: string, password: string, displayName: string) => {
@@ -56,19 +81,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw e;
       }
     },
-    []
+    [],
   );
 
   const signOut = useCallback(async () => {
     const { signOut: firebaseSignOut } = await import("firebase/auth");
     await firebaseSignOut(auth);
+    if (await GoogleSignin.hasPreviousSignIn()) {
+      await GoogleSignin.signOut();
+    }
   }, []);
 
   const setDisplayName = useCallback(async (name: string) => {
     if (!auth.currentUser) return;
     await authService.updateUserDisplayName(auth.currentUser.uid, name);
     await import("firebase/auth").then(({ updateProfile }) =>
-      updateProfile(auth.currentUser!, { displayName: name })
+      updateProfile(auth.currentUser!, { displayName: name }),
     );
     setUser({ ...auth.currentUser, displayName: name });
   }, []);
@@ -80,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInAnonymously,
     signInWithEmail,
     signUpWithEmail,
+    signInWithGoogle,
     signOut,
     setDisplayName,
   };

@@ -19,16 +19,14 @@ const CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 function generateServerCode(): string {
   let code = "";
   for (let i = 0; i < CODE_LENGTH; i++) {
-    code += CODE_CHARS.charAt(
-      Math.floor(Math.random() * CODE_CHARS.length)
-    );
+    code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
   }
   return code;
 }
 
 export async function createServer(
   name: string,
-  createdBy: string
+  createdBy: string,
 ): Promise<string> {
   const maxAttempts = 5;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -49,12 +47,11 @@ export async function createServer(
 
 export async function joinServerByCode(
   serverCode: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
   const trimmed = serverCode.trim();
   if (!trimmed) throw new Error("Code invalide");
-  const code =
-    trimmed.length === CODE_LENGTH ? trimmed.toUpperCase() : trimmed;
+  const code = trimmed.length === CODE_LENGTH ? trimmed.toUpperCase() : trimmed;
   const serverRef = doc(db, SERVERS, code);
   const snap = await getDoc(serverRef);
   if (!snap.exists()) throw new Error("Serveur introuvable. Vérifie le code.");
@@ -78,12 +75,12 @@ export function subscribeServersForUser(
       name: string;
       createdBy: string;
       members: string[];
-    }>
-  ) => void
+    }>,
+  ) => void,
 ): () => void {
   const q = query(
     collection(db, SERVERS),
-    where("members", "array-contains", userId)
+    where("members", "array-contains", userId),
   );
   return onSnapshot(q, (snapshot) => {
     const servers = snapshot.docs.map((d) => ({

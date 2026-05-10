@@ -1,5 +1,6 @@
 {
   "expo": {
+    "icon": "./assets/LogoAperoBingo.png",
     "name": "NightBingo",
     "slug": "nightbingo",
     "version": "1.0.0",
@@ -9,21 +10,28 @@
     "splash": {
       "backgroundColor": "#0f172a"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.nightbingo.app"
+      "bundleIdentifier": "com.nightbingo.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
+      "icon": "./assets/LogoAperoBingo.png",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/LogoAperoBingo.png",
         "backgroundColor": "#0f172a"
       },
       "package": "com.nightbingo.app"
     },
-    "plugins": [
-      "expo-asset"
-    ]
+    "plugins": ["expo-asset", "@react-native-firebase/app"],
+    "extra": {
+      "eas": {
+        "projectId": "f55f089c-ab81-4ae6-bbeb-e9a77cb6593a"
+      }
+    }
   }
 }
